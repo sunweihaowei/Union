@@ -5,39 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/main_fragment_selected_bg">
-    <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@color/colorPrimaryDark">
-        <TextView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="SWH"
-            android:textColor="@color/white"
-            android:textSize="20sp"/>
 
-        <EditText
-            android:paddingHorizontal="10dp"
-            android:layout_weight="1"
-            android:id="@+id/et_search"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/shape_edit_box_bg"
-            android:hint="请输入您想要的美食"
-            android:textSize="14sp"/>
-        <ImageView
-            android:id="@+id/scan_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:src="@mipmap/scan_white" />
-    </LinearLayout>
     <com.google.android.material.tabs.TabLayout
         app:tabMode="scrollable"
         android:layout_width="match_parent"

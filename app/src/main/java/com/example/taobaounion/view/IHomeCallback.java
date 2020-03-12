@@ -1,12 +1,13 @@
 package com.example.taobaounion.view;
 
+import com.example.taobaounion.base.IBaseCallback;
 import com.example.taobaounion.model.domain.Categories;
 
 /**
  * The interface Home callback.
  */
 //这里是通知UI更新
-public interface IHomeCallback {
+public interface IHomeCallback extends IBaseCallback {
     /**
      * On categories loaded.
      *接口是不用reture直接有
@@ -17,9 +18,5 @@ public interface IHomeCallback {
     * */
     void onCategoriesLoaded(Categories categories);
 
-    void onNetworkError();
 
-    void onLoading();
-
-    void onEmpty();
 }

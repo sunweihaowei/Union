@@ -38,11 +38,11 @@ public class HomePresenterImpl implements IHomePresenter {
                     //请求成功
                     Categories categories = response.body();
                     if (mIHomeCallback !=null) {
-                    if (categories==null || categories.getData().size()==0) {
-                        mIHomeCallback.onEmpty();
-                    }else {
-                        mIHomeCallback.onCategoriesLoaded(categories);
-                    }
+                        if (categories==null || categories.getData().size()==0) {
+                            mIHomeCallback.onEmpty();
+                        }else {
+                            mIHomeCallback.onCategoriesLoaded(categories);
+                        }
                     }
                 }else {
                     //请求失败
@@ -62,14 +62,14 @@ public class HomePresenterImpl implements IHomePresenter {
             }
         });
     }
-//    注册
+    //    注册
     @Override
-    public void registerCallback(IHomeCallback callback) {
-            this.mIHomeCallback =callback;//这种也是变成成员变量
+    public void registerViewCallback(IHomeCallback callback) {
+        this.mIHomeCallback =callback;//这种也是变成成员变量
     }
-//    不注册
+    //    不注册
     @Override
-    public void unregisterCallback(IHomeCallback callback) {
+    public void unregisterViewCallback(IHomeCallback callback) {
         mIHomeCallback =null;
     }
 }
