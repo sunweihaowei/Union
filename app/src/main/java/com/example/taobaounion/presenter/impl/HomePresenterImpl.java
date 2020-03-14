@@ -48,7 +48,7 @@ public class HomePresenterImpl implements IHomePresenter {
                     //请求失败
                     LogUtils.i(this,"failing");
                     if (mIHomeCallback != null) {
-                        mIHomeCallback.onNetworkError();
+                        mIHomeCallback.onError();
                     }
                 }
             }
@@ -57,7 +57,7 @@ public class HomePresenterImpl implements IHomePresenter {
             public void onFailure(Call<Categories> call, Throwable t) {
                 LogUtils.e(HomePresenterImpl.this,"请求错误----------------------》" + t);
                 if (mIHomeCallback != null) {
-                    mIHomeCallback.onNetworkError();
+                    mIHomeCallback.onError();
                 }
             }
         });

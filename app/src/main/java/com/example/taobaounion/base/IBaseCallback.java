@@ -6,7 +6,7 @@ package com.example.taobaounion.base;
  * 创建时间：2020/3/10 0010  10:58
  */
 public interface IBaseCallback {
-    void onNetworkError();
+    void onError();
 
     void onLoading();
 

@@ -3,17 +3,24 @@ package com.example.taobaounion.ui.fragment;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.taobaounion.R;
 import com.example.taobaounion.base.BaseFragment;
 import com.example.taobaounion.model.domain.Categories;
 import com.example.taobaounion.model.domain.HomePagerContentBean;
 import com.example.taobaounion.presenter.ICategoryPagerPresenter;
 import com.example.taobaounion.presenter.impl.CategoryPagePresenterImpl;
+import com.example.taobaounion.ui.adapter.HomePageContentAdapter;
+import com.example.taobaounion.ui.adapter.HomePagerAdapter;
 import com.example.taobaounion.utils.Constants;
 import com.example.taobaounion.utils.LogUtils;
 import com.example.taobaounion.view.ICategoryPagerCallback;
 
 import java.util.List;
+
+import butterknife.BindView;
 
 /**
  * 项目名称：TaobaoUnion
@@ -23,18 +30,23 @@ import java.util.List;
 public class HomePagerFragment extends BaseFragment implements ICategoryPagerCallback {
 
     private ICategoryPagerPresenter mICategoryPagerPresenter;
+    private int mMaterialId;
+    private HomePageContentAdapter mHomePageContentAdapter;
 
     //自己在里面new自己，这样可以HomePagerFragment.newInstance来调用自己
     //单例模式Singleton pattern
-    public static HomePagerFragment newInstance(Categories.DataBean category){
-        HomePagerFragment homePagerFragment=new HomePagerFragment();
+    public static HomePagerFragment newInstance(Categories.DataBean category) {
+        HomePagerFragment homePagerFragment = new HomePagerFragment();
 
-        Bundle bundle=new Bundle();
-        bundle.putString(Constants.KEY_HOME_PAGER_TITLE,category.getTitle());
-        bundle.putInt(Constants.KEY_HOME_PAGER_MATERIAL_ID,category.getId());
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.KEY_HOME_PAGER_TITLE, category.getTitle());
+        bundle.putInt(Constants.KEY_HOME_PAGER_MATERIAL_ID, category.getId());
         homePagerFragment.setArguments(bundle);
         return homePagerFragment;
     }
+
+    @BindView(R.id.home_pager_content_list)
+    public RecyclerView mContentList;
 
     @Override
     protected int getRootViewResId() {
@@ -43,8 +55,14 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
 
     @Override
     protected void initView(View rootView) {
-        setUpState(State.SUCCESS);
+        //设置布局管理器
+        mContentList.setLayoutManager(new LinearLayoutManager(getContext()));
+        //创建适配器
+        mHomePageContentAdapter = new HomePageContentAdapter();
+        //设置适配器
+        mContentList.setAdapter(mHomePageContentAdapter);
     }
+
     /**
      * @Author 孙伟豪
      * @Date 2020/3/11 0011 10:42
@@ -58,44 +76,51 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
 
     @Override
     protected void loadData() {
-        Bundle arguments = getArguments();
+        Bundle arguments = getArguments();//获取参数
         String title = arguments.getString(Constants.KEY_HOME_PAGER_TITLE);
-        int materialId = arguments.getInt(Constants.KEY_HOME_PAGER_MATERIAL_ID);
-        LogUtils.d(this,"title -- >" +title);
-        LogUtils.d(this,"materiaId -- >" +materialId);
-        //TODO:加载数据
-        if (mICategoryPagerPresenter !=null) {
-            mICategoryPagerPresenter.getContentByCategoryId(materialId);
+        mMaterialId = arguments.getInt(Constants.KEY_HOME_PAGER_MATERIAL_ID);
+        LogUtils.d(this, "title -- >" + title);
+        LogUtils.d(this, "materiaId -- >" + mMaterialId);
+        if (mICategoryPagerPresenter != null) {
+            mICategoryPagerPresenter.getContentByCategoryId(mMaterialId);
         }
     }
 
     @Override
-    public void onContentLoaded(List<HomePagerContentBean> contents) {
+    public void onContentLoaded(List<HomePagerContentBean.DataBean> contents) {
+        //数据列表加载到了
+       mHomePageContentAdapter.setData(contents);
+        setUpState(State.SUCCESS);
+    }
+
+    @Override
+    public int getCategoryId() {
+        return mMaterialId;
+    }
+
+    @Override
+    public void onLoading() {
+        setUpState(State.LOADING);
+    }
+
+    @Override
+    public void onError() {
+        //网络错误
+        setUpState(State.ERROR);
+    }
+
+    @Override
+    public void onEmpty() {
+        setUpState(State.EMPTY);
+    }
+
+    @Override
+    public void onLoaderMoreError() {
 
     }
 
     @Override
-    public void onloading(int categoryId) {
-
-    }
-
-    @Override
-    public void onError(int categoryId) {
-
-    }
-
-    @Override
-    public void onEmpty(int categoryId) {
-
-    }
-
-    @Override
-    public void onLoaderMoreError(int categoryId) {
-
-    }
-
-    @Override
-    public void onLoaderMoreEmpty(int categoryId) {
+    public void onLoaderMoreEmpty() {
 
     }
 
@@ -108,15 +133,15 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
     public void onLooperListLoaded(List<HomePagerContentBean.DataBean> contents) {
 
     }
+
     /**
-     *
      * @Author 孙伟豪
      * @Date 2020/3/11 0011 10:43
      * 释放掉
      */
     @Override
     protected void release() {
-        if (mICategoryPagerPresenter !=null) {
+        if (mICategoryPagerPresenter != null) {
             mICategoryPagerPresenter.unregisterViewCallback(this);
         }
     }

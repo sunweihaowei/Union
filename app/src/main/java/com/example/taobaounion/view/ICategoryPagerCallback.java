@@ -1,5 +1,6 @@
 package com.example.taobaounion.view;
 
+import com.example.taobaounion.base.IBaseCallback;
 import com.example.taobaounion.model.domain.HomePagerContentBean;
 
 import java.util.List;
@@ -9,49 +10,28 @@ import java.util.List;
  * 创建人：sunweihao
  * 创建时间：2020/3/10 0010  9:55
  */
-public interface ICategoryPagerCallback {
+public interface ICategoryPagerCallback extends IBaseCallback {
 
     /**
      * On content loaded.加载成功
      *
      * @param contents the contents
      */
-    void onContentLoaded(List<HomePagerContentBean> contents);
+    void onContentLoaded(List<HomePagerContentBean.DataBean> contents);
 
-    /**
-     * Onloading.加载中
-     *
-     * @param categoryId the category id
-     */
-    void onloading( int categoryId);//对应的告诉哪个界面更新
-
-    /**
-     * On error.加载错误
-     *
-     * @param categoryId the category id
-     */
-    void onError(int categoryId);
-
-    /**
-     * On empty.加载为空
-     *
-     * @param categoryId the category id
-     */
-    void onEmpty(int categoryId);
+    int getCategoryId();
 
     /**
      * On loader more error.加载更多时，网络错误
      *
-     * @param categoryId the category id
      */
-    void onLoaderMoreError(int categoryId);
+    void onLoaderMoreError();
 
     /**
      * On loader more empty.没有更多内容
      *
-     * @param categoryId the category id
      */
-    void onLoaderMoreEmpty(int categoryId);
+    void onLoaderMoreEmpty();
 
     /**
      * On loader more loaded.加载更多内容了

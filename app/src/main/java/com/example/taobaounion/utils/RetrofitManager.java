@@ -24,7 +24,7 @@ public class RetrofitManager {
     private RetrofitManager() {
         //创建retrofit
         mRetrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(Constants.BASE_URL)//Url的头部
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
