@@ -1,8 +1,10 @@
 package com.example.taobaounion.ui.fragment;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,8 +59,15 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
     protected void initView(View rootView) {
         //设置布局管理器
         mContentList.setLayoutManager(new LinearLayoutManager(getContext()));
-        //创建适配器
-        mHomePageContentAdapter = new HomePageContentAdapter();
+        mContentList.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.top = 5;
+                outRect.bottom = 5;
+            }
+        });
+                //创建适配器
+                mHomePageContentAdapter = new HomePageContentAdapter();
         //设置适配器
         mContentList.setAdapter(mHomePageContentAdapter);
     }
