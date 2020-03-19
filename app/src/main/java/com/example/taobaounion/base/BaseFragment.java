@@ -60,10 +60,19 @@ public abstract class BaseFragment extends Fragment{
          * 下面的方法要重写
          */
         initView(rootView);//加载id，其他的
+        initListener();
         initPresenter();//主持人处理了：得到数据，注册
         loadData();//加载数据：
         return rootView;
     }
+    /**
+     * @Author 孙伟豪
+     * @Date 2020/3/19 0019 16:29
+     * 如果子类需要设置相关的事件，覆盖此方法
+     */
+    protected void initListener() {
+    }
+
     protected View loadRootView(LayoutInflater inflater, ViewGroup container) {
         return inflater.inflate(R.layout.base_fragment_layout, container, false);//加载一个FrameLayout坑界面
     }

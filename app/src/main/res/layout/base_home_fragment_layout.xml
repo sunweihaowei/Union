@@ -16,8 +16,10 @@
             android:text="SWH"
             android:textColor="@color/white"
             android:textSize="20sp"/>
-
         <EditText
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:paddingHorizontal="10dp"
             android:layout_weight="1"
             android:id="@+id/et_search"

@@ -1,5 +1,7 @@
 package com.example.taobaounion.ui.adapter;
 
+import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,20 +57,45 @@ public class HomePageContentAdapter extends RecyclerView.Adapter<HomePageContent
     public class InnerHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.goods_cover)
-        public ImageView iv_cover;
+        public ImageView iv_cover;//图片封面
 
         @BindView(R.id.goods_title)
-        public TextView tv_titile;
+        public TextView tv_titile;//物品名
+
+        @BindView(R.id.goods_save_money)
+        public TextView TVGoodsSaveMoney;//省钱
+
+        @BindView(R.id.goods_special_price)
+        public TextView TVGoodsSpecialPrice;//省钱
+
+        @BindView(R.id.goods_original_price)
+        public TextView TVGoodsOriginalPrice;//原价
+
+        @BindView(R.id.goods_purchased)
+        public TextView TVGoodsPurchased;
 
         public InnerHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
         }
         public void setData(HomePagerContentBean.DataBean dataBean) {
+            Context context = itemView.getContext();
             tv_titile.setText(dataBean.getTitle());
+            Glide.with(itemView.getContext()).load(UrlUtils.getCoverPath(dataBean.getPict_url())).into(iv_cover);
+
+            String finalPrise = dataBean.getZk_final_price();
+            long couponAmount = dataBean.getCoupon_amount();
+            LogUtils.d(this,"finalPrise---->"+finalPrise);
+            LogUtils.d(this,"couponAmount--->"+couponAmount);
             //打印"//gw.alicdn.com/bao/uploaded/i4/2206638096577/O1CN01p0B2z91ySJVfGqLCJ_!!0-item_pic.jpg"是没有协议开头的
             LogUtils.d(this,"dataBeanUrl------>" + dataBean.getPict_url());
-            Glide.with(itemView.getContext()).load(UrlUtils.getCoverPath(dataBean.getPict_url())).into(iv_cover);
+            TVGoodsSaveMoney.setText(String.format(itemView.getContext().getString(R.string.text_goods_off_prise),couponAmount));
+            float resultPrise=Float.parseFloat(finalPrise)-couponAmount;
+            TVGoodsOriginalPrice.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);//这里是划掉字
+            TVGoodsOriginalPrice.setText(String.format(context.getString(R.string.text_goods_original_prise), finalPrise));
+            TVGoodsSpecialPrice.setText(String.format("%.2f",resultPrise));
+            TVGoodsPurchased.setText(String.format(context.getString(R.string.text_goods_sell_count),dataBean.getVolume()));
+
         }
     }
 }

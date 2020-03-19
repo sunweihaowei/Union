@@ -19,17 +19,20 @@ public interface ICategoryPagerCallback extends IBaseCallback {
      */
     void onContentLoaded(List<HomePagerContentBean.DataBean> contents);
 
+    /**
+     * Gets category id.
+     *
+     * @return the category id
+     */
     int getCategoryId();
 
     /**
      * On loader more error.加载更多时，网络错误
-     *
      */
     void onLoaderMoreError();
 
     /**
      * On loader more empty.没有更多内容
-     *
      */
     void onLoaderMoreEmpty();
 

@@ -67,6 +67,7 @@ public class HomeFragment extends BaseFragment implements IHomeCallback {
         LogUtils.d(this,"onCategoriesLoaded..");
         //        加载的数据会从这里出来，布局存在时加载数据
         if (mHomePagerAdapter!=null){
+//            homePager.setOffscreenPageLimit(categories.getData().size());//这样占内存
             mHomePagerAdapter.setCategories(categories);
         }
     }

@@ -2,9 +2,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:gravity="center"
     android:background="#EFEEEE">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:layout_marginBottom="7dp">
+        <androidx.viewpager.widget.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="125dp"
+            android:id="@+id/looper_pager"
+            android:overScrollMode="never"></androidx.viewpager.widget.ViewPager>
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/looper_point_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"></LinearLayout>
+    </RelativeLayout>
+    <!--标题-->
+    <include layout="@layout/include_home_pager_title_part"/>
     <androidx.recyclerview.widget.RecyclerView
+        android:layout_marginTop="5dp"
         android:overScrollMode="never"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

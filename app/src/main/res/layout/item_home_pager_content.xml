@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="胜利大街烦死额房间爱搜的sdfasdfasdfsdf叫法京东方水电费水电费"/>
         <TextView
-            android:id="@+id/goods_off_prise"
+            android:id="@+id/goods_save_money"
             android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,18 +43,26 @@
                 android:layout_height="wrap_content"
                 android:text="卷后价："
                 android:textColor="@color/colorPrimaryDark"/>
+            <!--优惠价-->
             <TextView
+                android:id="@+id/goods_special_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="19.80"
                 android:textColor="@color/colorPrimaryDark"/>
+            <!--原价-->
             <TextView
-                android:layout_marginLeft="10dp"
+                android:textSize="11sp"
+                android:id="@+id/goods_original_price"
+                android:layout_marginLeft="11sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="￥23"
                 android:textColor="@color/colorGrey"/>
+            <!--已购人数-->
             <TextView
+                android:textSize="12sp"
+                android:id="@+id/goods_purchased"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1000已经购买"
