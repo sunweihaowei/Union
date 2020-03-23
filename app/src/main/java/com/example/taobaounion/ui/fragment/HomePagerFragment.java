@@ -1,7 +1,6 @@
 package com.example.taobaounion.ui.fragment;
 
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -23,12 +23,14 @@ import com.example.taobaounion.model.domain.HomePagerContentBean;
 import com.example.taobaounion.presenter.ICategoryPagerPresenter;
 import com.example.taobaounion.presenter.impl.CategoryPagePresenterImpl;
 import com.example.taobaounion.ui.adapter.HomePageContentAdapter;
-import com.example.taobaounion.ui.adapter.HomePagerAdapter;
 import com.example.taobaounion.ui.adapter.LooperPagerAdapter;
 import com.example.taobaounion.utils.Constants;
 import com.example.taobaounion.utils.LogUtils;
 import com.example.taobaounion.utils.SizeUtils;
 import com.example.taobaounion.view.ICategoryPagerCallback;
+import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
+import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
+import com.vondear.rxtool.view.RxToast;
 
 import java.util.List;
 
@@ -46,15 +48,15 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
     private int mMaterialId;
     private HomePageContentAdapter mHomePageContentAdapter;
     private LooperPagerAdapter mLooperPagerAdapter;
-
     //自己在里面new自己，这样可以HomePagerFragment.newInstance来调用自己
     //单例模式Singleton pattern
+    //HomeFragment就会把category这个bean传过来，然后把他储存（setArguments）
     public static HomePagerFragment newInstance(Categories.DataBean category) {
         HomePagerFragment homePagerFragment = new HomePagerFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.KEY_HOME_PAGER_TITLE, category.getTitle());
+        bundle.putString(Constants.KEY_HOME_PAGER_TITLE, category.getTitle());//加入
         bundle.putInt(Constants.KEY_HOME_PAGER_MATERIAL_ID, category.getId());
-        homePagerFragment.setArguments(bundle);//将数据绑定到homePagerFragment，然后它有数据
+        homePagerFragment.setArguments(bundle);//将我们滑到的那一项数据绑定到homePagerFragment，然后它有数据
 
         return homePagerFragment;
     }
@@ -67,6 +69,8 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
     public TextView currentCategoryTitleTv;
     @BindView(R.id.looper_point_container)
     public LinearLayout mLooperPointContainer;
+    @BindView(R.id.home_pager_refresh)
+    public TwinklingRefreshLayout homePagerTwinklingRefreshLayout;
 
     @Override
     protected int getRootViewResId() {
@@ -92,6 +96,84 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
         mLooperPagerAdapter = new LooperPagerAdapter();
 //        设置适配器
         mLooperVP.setAdapter(mLooperPagerAdapter);
+//        设置refresh的相关属性
+        homePagerTwinklingRefreshLayout.setEnableRefresh(false);
+        homePagerTwinklingRefreshLayout.setEnableLoadmore(true);
+    }
+
+    @Override
+    protected void initListener() {
+        mLooperVP.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                /*LogUtils.d(this,"hello,我是onPageScrolled");*/
+                Log.d("HomePagerFragment","hello111,我是onPageScrolled");
+            }
+            @Override
+            public void onPageSelected(int position) {
+                int dataSize = mLooperPagerAdapter.getDataSize();
+                if (dataSize==0) {
+                    return;
+                }
+                LogUtils.d(this,"hello,我是onPageonPageSelected");
+                int targetPosition;
+                LogUtils.d(this,"dataSize----->"+dataSize);
+                targetPosition = position % dataSize;//这里是自己的方法
+//                int targetPosition = position % mLooperPagerAdapter.getDataSize();//这里是最好的方法
+//                LogUtils.d(this,""+mLooperPagerAdapter.getDataSize());
+                //切换指示器
+                updateLooperIndicator(targetPosition);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                LogUtils.d(this,"hello,我是onPageScrollStateChanged");
+                LogUtils.d(this,"DataSize----->"+mLooperPagerAdapter.getDataSize());
+            }
+        });
+        homePagerTwinklingRefreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
+            @Override
+            public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
+                LogUtils.d(this,"触发了Loader More...");
+
+            }
+        });
+        homePagerTwinklingRefreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
+            @Override
+            public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
+                LogUtils.d(HomePagerFragment.this,"触发了Load More");
+//                去加载更多内容
+                if (mICategoryPagerPresenter!=null) {
+                    mICategoryPagerPresenter.loaderMore(mMaterialId);//这里输入id，告诉在哪里
+                }
+
+//                这里是发布延迟
+                homePagerTwinklingRefreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //TODO：模拟加载数据
+                        homePagerTwinklingRefreshLayout.finishLoadmore();
+                        Toast.makeText(getContext(), "你好牛逼，一下子就加载了10000条，哈哈",Toast.LENGTH_SHORT).show();
+                    }
+                }, 3000);
+            }
+        });
+    }
+   /**
+    * @Author 孙伟豪
+    * @Date 2020/3/19 0019 20:07
+    * 更新指示灯方法
+    */
+    private void updateLooperIndicator(int targetPosition) {
+        for (int i = 0; i < mLooperPointContainer.getChildCount(); i++) {
+            View point=mLooperPointContainer.getChildAt(i);
+            if (i == targetPosition) {
+                point.setBackgroundResource(R.drawable.shape_indicator_point_selected);
+            } else {
+                point.setBackgroundResource(R.drawable.shape_indicator_point_normal);
+            }
+        }
+
     }
 
     /**
@@ -99,9 +181,9 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
      * @Date 2020/3/11 0011 10:42
      */
     @Override
-    protected void initPresenter() {
+    protected void initPresenter() {//打开界面执行
         mICategoryPagerPresenter = CategoryPagePresenterImpl.getsInstance();
-        mICategoryPagerPresenter.registerViewCallback(this);
+        mICategoryPagerPresenter.registerViewCallback(this);//接口注册，注册后就不为null，
         //然后当前类来实现接口
     }
 
@@ -112,7 +194,9 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
      */
     @Override
     protected void loadData() {
-        Bundle arguments = getArguments();//获取参数
+        int dataSize = mLooperPagerAdapter.getDataSize();
+        LogUtils.d(this,"dataSize  ---  >"+dataSize);
+        Bundle arguments = getArguments();//获取加入到homeAdapter添加时的滑到的那一项参数
         String title = arguments.getString(Constants.KEY_HOME_PAGER_TITLE);
         mMaterialId = arguments.getInt(Constants.KEY_HOME_PAGER_MATERIAL_ID);
         LogUtils.d(this, "title -- >" + title);
@@ -176,18 +260,18 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onLooperListLoaded(List<HomePagerContentBean.DataBean> contents) {
-        LogUtils.d(this, "Looper size-0----->" + contents.size());
+        LogUtils.d(this, "Looper size----->" + contents.size());
+        //设置数据
+        mLooperPagerAdapter.setData(contents);
         //中间点%数据的size不一定为0，所以显示的就不是第一个。
         //处理一下，变成第一个为0
         int dx=(Integer.MAX_VALUE/2)%contents.size();
         int targetCenterPosition=(Integer.MAX_VALUE/2)-dx;
         //设置到中间点
         mLooperVP.setCurrentItem(targetCenterPosition);
-        mLooperPagerAdapter.setData(contents);
+        List<HomePagerContentBean.DataBean> dataBeans = mLooperPagerAdapter.getDataBeans();
+        LogUtils.d(this,"dateBeans-------->"+dataBeans.size());
         mLooperPointContainer.removeAllViews();
-        GradientDrawable selectedDrawable = (GradientDrawable) getContext().getDrawable(R.drawable.shape_indicator_point);
-        GradientDrawable normalDrawable = (GradientDrawable) getContext().getDrawable(R.drawable.shape_indicator_point);
-        normalDrawable.setColor(getContext().getColor(R.color.white));
         //添加点
         for (int i = 0; i < contents.size(); i++) {
             View point = new View(getContext());
@@ -197,9 +281,9 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
             layoutParams.rightMargin = SizeUtils.dip2xp(getContext(), 5);
             point.setLayoutParams(layoutParams);
             if (i == 0) {
-                point.setBackground(selectedDrawable);
+                point.setBackgroundResource(R.drawable.shape_indicator_point_selected);
             } else {
-                point.setBackground(normalDrawable);
+                point.setBackgroundResource(R.drawable.shape_indicator_point_normal);
             }
             mLooperPointContainer.addView(point);
         }

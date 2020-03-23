@@ -27,7 +27,7 @@ import retrofit2.Retrofit;
  */
 public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
 
-    private Map<Integer, Integer> pagesInfoHashMap = new HashMap<>();
+    private Map<Integer, Integer> pagesInfoHashMap = new HashMap<>();//集合保存页码
 
     public static final int DEFAULT_PAGE = 1;
 
@@ -46,24 +46,22 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
     }
 
     @Override
-    public void getContentByCategoryId(int categoryId) {//这里是界面id
+    public void getContentByCategoryId(int categoryId) {//页id，推选：9660，食品：9649
         for (ICategoryPagerCallback callback : callbacks) {//我们切换好多次，导致有好多个布局
-            if (callback.getCategoryId()==categoryId) {
+            if (callback.getCategoryId()==categoryId) {//这里把所有callbacks都弄出来，进行比较，如果是就执行
                 callback.onLoading();
             }
         }
         //根据分类id去加载内容
         Retrofit retrofit = RetrofitManager.getInstance().getRetrofit();//随便得到头部
         Api api = retrofit.create(Api.class);//这里选择尾部还是待定
-        Integer targetPage = pagesInfoHashMap.get(categoryId);//得到一个非空值
+        Integer targetPage = pagesInfoHashMap.get(categoryId);//得到一个页码9649那样子
         if (targetPage == null) {
-            targetPage = DEFAULT_PAGE;
-            pagesInfoHashMap.put(categoryId, targetPage);
+            targetPage = DEFAULT_PAGE;//1
+            pagesInfoHashMap.put(categoryId, targetPage);//页码key来拿那一页
         }
         LogUtils.d(this,"categoryId--->"+categoryId);
-        String homePagerUrl = UrlUtils.createHomePagerUrl(categoryId, targetPage);
-        LogUtils.d(CategoryPagePresenterImpl.this, "homePagerUrl-- >" + homePagerUrl);
-        Call<HomePagerContentBean> task = api.getHomePageContentBean(homePagerUrl);//选择一个Api并得到尾部
+        Call<HomePagerContentBean> task = createTask(categoryId, api, targetPage);
         task.enqueue(new Callback<HomePagerContentBean>() {
             @Override
             public void onResponse(Call<HomePagerContentBean> call, Response<HomePagerContentBean> response) {
@@ -78,13 +76,18 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
                     handleNetworkError(categoryId);
                 }
             }
-
             @Override
             public void onFailure(Call<HomePagerContentBean> call, Throwable t) {
                 LogUtils.d(CategoryPagePresenterImpl.this, "onFailure--->" + t.toString());
                 handleNetworkError(categoryId);
             }
         });
+    }
+
+    private Call<HomePagerContentBean> createTask(int categoryId, Api api, Integer targetPage) {
+        String homePagerUrl = UrlUtils.createHomePagerUrl(categoryId, targetPage);//页码加哪一页，这里都是第一页
+        LogUtils.d(CategoryPagePresenterImpl.this, "homePagerUrl-- >" + homePagerUrl);
+        return api.getHomePageContentBean(homePagerUrl);
     }
 
     private void handleNetworkError(int categoryId) {
@@ -103,17 +106,16 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
                 if (pagerContentBean==null || pagerContentBean.getData().size()==0) {
                     callback.onEmpty();
                 }else {
-                    List<HomePagerContentBean.DataBean> looperData = data.subList(data.size() - 5, data.size());//返回最好5个
+                    List<HomePagerContentBean.DataBean> looperData = data.subList(data.size() - 5, data.size());//返回最后5个
                     callback.onLooperListLoaded(looperData);
                     callback.onContentLoaded(data);
                 }
             }
         }
     }
-
     @Override
     public void loaderMore(int categoryId) {
-
+        //加载更多，
     }
 
     @Override
@@ -121,12 +123,12 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
 
     }
 
-    private List<ICategoryPagerCallback> callbacks = new ArrayList<>();//这里VIewPager有好多个
+    private List<ICategoryPagerCallback> callbacks = new ArrayList<>();//这里ViewPager有好多个
 
     @Override
-    public void registerViewCallback(ICategoryPagerCallback callback) {
+    public void registerViewCallback(ICategoryPagerCallback callback) {//把使用这个方法的界面注册过来，calllback==那边的界面
         if (!callbacks.contains(callback)) {
-            callbacks.add(callback);
+            callbacks.add(callback);//
         }
     }
 

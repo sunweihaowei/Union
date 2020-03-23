@@ -32,10 +32,10 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
 
     @NonNull
     @Override
-    public Fragment getItem(int position) {
+    public Fragment getItem(int position) {//这里是得到我们滑到的那一项
         LogUtils.d(this,"getItem - >"+position);
         Categories.DataBean dataBean = categoryList.get(position);
-        HomePagerFragment homePagerFragment=HomePagerFragment.newInstance(dataBean);
+        HomePagerFragment homePagerFragment=HomePagerFragment.newInstance(dataBean);//这里是输入那一项的ID
         return homePagerFragment;
     }
 

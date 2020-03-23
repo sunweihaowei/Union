@@ -59,7 +59,11 @@ public class HomeFragment extends BaseFragment implements IHomeCallback {
         mIHomePresenter.getCategories();
     }
 
-
+    /**
+     * @Author 孙伟豪
+     * @Date 2020/3/20 0020 18:37
+     * 这里后面的方法是被调用才会执行，即接口要实现后，要被调用才执行
+     */
 
     @Override
     public void onCategoriesLoaded(Categories categories) {

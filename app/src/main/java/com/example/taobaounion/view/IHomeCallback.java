@@ -17,6 +17,4 @@ public interface IHomeCallback extends IBaseCallback {
     * 已经加载
     * */
     void onCategoriesLoaded(Categories categories);
-
-
 }
