@@ -30,6 +30,7 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
     private Map<Integer, Integer> pagesInfoHashMap = new HashMap<>();//集合保存页码
 
     public static final int DEFAULT_PAGE = 1;
+    private Integer mCurrentPage;
 
     private CategoryPagePresenterImpl() {
 
@@ -48,20 +49,18 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
     @Override
     public void getContentByCategoryId(int categoryId) {//页id，推选：9660，食品：9649
         for (ICategoryPagerCallback callback : callbacks) {//我们切换好多次，导致有好多个布局
-            if (callback.getCategoryId()==categoryId) {//这里把所有callbacks都弄出来，进行比较，如果是就执行
+            if (callback.getCategoryId() == categoryId) {//这里把所有callbacks都弄出来，进行比较，如果是就执行
                 callback.onLoading();
             }
         }
         //根据分类id去加载内容
-        Retrofit retrofit = RetrofitManager.getInstance().getRetrofit();//随便得到头部
-        Api api = retrofit.create(Api.class);//这里选择尾部还是待定
         Integer targetPage = pagesInfoHashMap.get(categoryId);//得到一个页码9649那样子
         if (targetPage == null) {
             targetPage = DEFAULT_PAGE;//1
             pagesInfoHashMap.put(categoryId, targetPage);//页码key来拿那一页
         }
-        LogUtils.d(this,"categoryId--->"+categoryId);
-        Call<HomePagerContentBean> task = createTask(categoryId, api, targetPage);
+        LogUtils.d(this, "categoryId--->" + categoryId);
+        Call<HomePagerContentBean> task = createTask(categoryId, targetPage);
         task.enqueue(new Callback<HomePagerContentBean>() {
             @Override
             public void onResponse(Call<HomePagerContentBean> call, Response<HomePagerContentBean> response) {
@@ -71,11 +70,12 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
                     HomePagerContentBean pagerContentBean = response.body();
                     LogUtils.d(CategoryPagePresenterImpl.this, "pageContent -->" + pagerContentBean);
                     //把数据给到UI更新
-                    handleHomePageContentResult(pagerContentBean,categoryId);
-                }else {
+                    handleHomePageContentResult(pagerContentBean, categoryId);
+                } else {
                     handleNetworkError(categoryId);
                 }
             }
+
             @Override
             public void onFailure(Call<HomePagerContentBean> call, Throwable t) {
                 LogUtils.d(CategoryPagePresenterImpl.this, "onFailure--->" + t.toString());
@@ -84,15 +84,16 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
         });
     }
 
-    private Call<HomePagerContentBean> createTask(int categoryId, Api api, Integer targetPage) {
+    private Call<HomePagerContentBean> createTask(int categoryId, Integer targetPage) {
         String homePagerUrl = UrlUtils.createHomePagerUrl(categoryId, targetPage);//页码加哪一页，这里都是第一页
-        LogUtils.d(CategoryPagePresenterImpl.this, "homePagerUrl-- >" + homePagerUrl);
+        Retrofit retrofit = RetrofitManager.getInstance().getRetrofit();//随便得到头部
+        Api api = retrofit.create(Api.class);//这里选择尾部还是待定
         return api.getHomePageContentBean(homePagerUrl);
     }
 
     private void handleNetworkError(int categoryId) {
         for (ICategoryPagerCallback callback : callbacks) {//不是就不鸟他，是就执行
-            if (callback.getCategoryId()==categoryId) {
+            if (callback.getCategoryId() == categoryId) {
                 callback.onError();
             }
         }
@@ -102,20 +103,73 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
         //通知UI层更新数据
         List<HomePagerContentBean.DataBean> data = pagerContentBean.getData();
         for (ICategoryPagerCallback callback : callbacks) {
-            if (callback.getCategoryId()==categoryId) {
-                if (pagerContentBean==null || pagerContentBean.getData().size()==0) {
+            if (callback.getCategoryId() == categoryId) {
+                if (pagerContentBean == null || pagerContentBean.getData().size() == 0) {
                     callback.onEmpty();
-                }else {
-                    List<HomePagerContentBean.DataBean> looperData = data.subList(data.size() - 5, data.size());//返回最后5个
+                } else {
+                    List<HomePagerContentBean.DataBean> looperData = data.subList(data.size() - 5, data.size());//返回最好5个
                     callback.onLooperListLoaded(looperData);
                     callback.onContentLoaded(data);
                 }
             }
         }
     }
+
     @Override
     public void loaderMore(int categoryId) {
         //加载更多，
+        //1.加载当前页面
+        mCurrentPage = pagesInfoHashMap.get(categoryId);
+        if (mCurrentPage == null) {
+            mCurrentPage = DEFAULT_PAGE;//第一页
+        }
+        //2.页码++
+        mCurrentPage++;
+        //3.加载数据
+        Call<HomePagerContentBean> task = createTask(categoryId, mCurrentPage);//这个是根据页码和第几页来加载数据任务
+        task.enqueue(new Callback<HomePagerContentBean>() {
+            @Override
+            public void onResponse(Call<HomePagerContentBean> call, Response<HomePagerContentBean> response) {
+                //result
+                int code = response.code();
+                LogUtils.d(CategoryPagePresenterImpl.this, "result code-- >" + response);
+                if (code == HttpURLConnection.HTTP_OK) {
+                    HomePagerContentBean result = response.body();//实例化
+                    LogUtils.d(CategoryPagePresenterImpl.this, "result body-- >" + result);
+                    handleLoaderResult(result, categoryId);//加载结果
+                } else {
+                    handleLoaderMoreError(categoryId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HomePagerContentBean> call, Throwable t) {
+                LogUtils.d(CategoryPagePresenterImpl.this, t.toString());
+                handleLoaderMoreError(categoryId);
+            }
+        });
+    }
+
+    private void handleLoaderResult(HomePagerContentBean result, int categoryId) {
+        for (ICategoryPagerCallback callback : callbacks) {
+            if (callback.getCategoryId() == categoryId) {
+                if (result==null || result.getData().size()==0){
+                    callback.onLoaderMoreEmpty();//告诉UI为空
+                }else {
+                    callback.onLoaderMoreLoaded(result.getData());//告诉UI去加载了
+                }
+            }
+        }
+    }
+
+    private void handleLoaderMoreError(int categoryId) {
+        mCurrentPage--;
+        pagesInfoHashMap.put(categoryId,mCurrentPage);
+        for (ICategoryPagerCallback callback : callbacks) {
+            if (callback.getCategoryId() == categoryId) {
+                callback.onLoaderMoreError();
+            }
+        }
     }
 
     @Override

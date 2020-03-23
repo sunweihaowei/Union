@@ -29,7 +29,8 @@ import butterknife.ButterKnife;
  * 创建时间：2020/3/13 0013  21:46
  */
 public class HomePageContentAdapter extends RecyclerView.Adapter<HomePageContentAdapter.InnerHolder> {
-    List<HomePagerContentBean.DataBean> dataBeans=new ArrayList<>();
+    List<HomePagerContentBean.DataBean> mData = new ArrayList<>();
+
     @NonNull
     @Override
     public InnerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -39,19 +40,29 @@ public class HomePageContentAdapter extends RecyclerView.Adapter<HomePageContent
 
     @Override
     public void onBindViewHolder(@NonNull InnerHolder holder, int position) {
-        HomePagerContentBean.DataBean dataBean = dataBeans.get(position);
+        HomePagerContentBean.DataBean dataBean = mData.get(position);
         holder.setData(dataBean);
     }
 
     @Override
     public int getItemCount() {
-        return dataBeans.size();
+        return mData.size();
     }
 
     public void setData(List<HomePagerContentBean.DataBean> contents) {
-        dataBeans.clear();
-        dataBeans.addAll(contents);
+        mData.clear();
+        mData.addAll(contents);
         notifyDataSetChanged();
+    }
+
+    public void addData(List<HomePagerContentBean.DataBean> contents) {
+        //添加之前要拿到原来的size
+        int olderSize = mData.size();
+        //加入刷新的数据
+        mData.addAll(contents);
+        //更新UI（根据位置）
+        notifyItemRangeChanged(olderSize,contents.size());
+
     }
 
     public class InnerHolder extends RecyclerView.ViewHolder {
@@ -76,8 +87,9 @@ public class HomePageContentAdapter extends RecyclerView.Adapter<HomePageContent
 
         public InnerHolder(@NonNull View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
+
         public void setData(HomePagerContentBean.DataBean dataBean) {
             Context context = itemView.getContext();
             tv_titile.setText(dataBean.getTitle());
@@ -85,16 +97,16 @@ public class HomePageContentAdapter extends RecyclerView.Adapter<HomePageContent
 
             String finalPrise = dataBean.getZk_final_price();
             long couponAmount = dataBean.getCoupon_amount();
-            LogUtils.d(this,"finalPrise---->"+finalPrise);
-            LogUtils.d(this,"couponAmount--->"+couponAmount);
+            LogUtils.d(this, "finalPrise---->" + finalPrise);
+            LogUtils.d(this, "couponAmount--->" + couponAmount);
             //打印"//gw.alicdn.com/bao/uploaded/i4/2206638096577/O1CN01p0B2z91ySJVfGqLCJ_!!0-item_pic.jpg"是没有协议开头的
-            LogUtils.d(this,"dataBeanUrl------>" + dataBean.getPict_url());
-            TVGoodsSaveMoney.setText(String.format(itemView.getContext().getString(R.string.text_goods_off_prise),couponAmount));
-            float resultPrise=Float.parseFloat(finalPrise)-couponAmount;
+            LogUtils.d(this, "dataBeanUrl------>" + dataBean.getPict_url());
+            TVGoodsSaveMoney.setText(String.format(itemView.getContext().getString(R.string.text_goods_off_prise), couponAmount));
+            float resultPrise = Float.parseFloat(finalPrise) - couponAmount;
             TVGoodsOriginalPrice.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);//这里是划掉字
             TVGoodsOriginalPrice.setText(String.format(context.getString(R.string.text_goods_original_prise), finalPrise));
-            TVGoodsSpecialPrice.setText(String.format("%.2f",resultPrise));
-            TVGoodsPurchased.setText(String.format(context.getString(R.string.text_goods_sell_count),dataBean.getVolume()));
+            TVGoodsSpecialPrice.setText(String.format("%.2f", resultPrise));
+            TVGoodsPurchased.setText(String.format(context.getString(R.string.text_goods_sell_count), dataBean.getVolume()));
 
         }
     }

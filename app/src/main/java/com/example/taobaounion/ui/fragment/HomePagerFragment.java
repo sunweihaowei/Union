@@ -27,6 +27,7 @@ import com.example.taobaounion.ui.adapter.LooperPagerAdapter;
 import com.example.taobaounion.utils.Constants;
 import com.example.taobaounion.utils.LogUtils;
 import com.example.taobaounion.utils.SizeUtils;
+import com.example.taobaounion.utils.ToastUtil;
 import com.example.taobaounion.view.ICategoryPagerCallback;
 import com.lcodecore.tkrefreshlayout.RefreshListenerAdapter;
 import com.lcodecore.tkrefreshlayout.TwinklingRefreshLayout;
@@ -97,8 +98,8 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
 //        设置适配器
         mLooperVP.setAdapter(mLooperPagerAdapter);
 //        设置refresh的相关属性
-        homePagerTwinklingRefreshLayout.setEnableRefresh(false);
-        homePagerTwinklingRefreshLayout.setEnableLoadmore(true);
+        homePagerTwinklingRefreshLayout.setEnableRefresh(false);//不能下拉刷新
+        homePagerTwinklingRefreshLayout.setEnableLoadmore(true);//可以加载更多
     }
 
     @Override
@@ -131,31 +132,14 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
                 LogUtils.d(this,"DataSize----->"+mLooperPagerAdapter.getDataSize());
             }
         });
-        homePagerTwinklingRefreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
-            @Override
-            public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
-                LogUtils.d(this,"触发了Loader More...");
 
-            }
-        });
         homePagerTwinklingRefreshLayout.setOnRefreshListener(new RefreshListenerAdapter() {
             @Override
             public void onLoadMore(TwinklingRefreshLayout refreshLayout) {
-                LogUtils.d(HomePagerFragment.this,"触发了Load More");
 //                去加载更多内容
                 if (mICategoryPagerPresenter!=null) {
                     mICategoryPagerPresenter.loaderMore(mMaterialId);//这里输入id，告诉在哪里
                 }
-
-//                这里是发布延迟
-                homePagerTwinklingRefreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //TODO：模拟加载数据
-                        homePagerTwinklingRefreshLayout.finishLoadmore();
-                        Toast.makeText(getContext(), "你好牛逼，一下子就加载了10000条，哈哈",Toast.LENGTH_SHORT).show();
-                    }
-                }, 3000);
             }
         });
     }
@@ -220,7 +204,6 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
         mHomePageContentAdapter.setData(contents);
         setUpState(State.SUCCESS);
     }
-
     @Override
     public int getCategoryId() {
         return mMaterialId;
@@ -244,19 +227,28 @@ public class HomePagerFragment extends BaseFragment implements ICategoryPagerCal
 
     @Override
     public void onLoaderMoreError() {
-
+        ToastUtil.showToast("网络错误，请重试");
+        if (homePagerTwinklingRefreshLayout!=null){//它还在加载，还没有结束，我们要手动结束
+            homePagerTwinklingRefreshLayout.finishLoadmore();//设置加载了,即结束加载
+        }
     }
 
     @Override
     public void onLoaderMoreEmpty() {
-
+        ToastUtil.showToast("没有更多可以展示的商品");
+        if (homePagerTwinklingRefreshLayout!=null){//它还在加载，还没有结束，我们要手动结束
+            homePagerTwinklingRefreshLayout.finishLoadmore();//设置加载了,即结束加载
+        }
     }
 
     @Override
     public void onLoaderMoreLoaded(List<HomePagerContentBean.DataBean> contents) {
-
+        mHomePageContentAdapter.addData(contents);
+        if (homePagerTwinklingRefreshLayout!=null){//它还在加载，还没有结束，我们要手动结束
+            homePagerTwinklingRefreshLayout.finishLoadmore();//设置加载了,即结束加载
+        }
+        ToastUtil.showToast("加载了"+contents.size()+"条数据");
     }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onLooperListLoaded(List<HomePagerContentBean.DataBean> contents) {
