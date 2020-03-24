@@ -18,6 +18,9 @@ import com.google.android.material.tabs.TabLayout;
 
 import butterknife.BindView;
 
+/**
+ * The type Home fragment.
+ */
 public class HomeFragment extends BaseFragment implements IHomeCallback {
     @BindView(R.id.home_pager)
     public ViewPager homePager;
@@ -94,10 +97,11 @@ public class HomeFragment extends BaseFragment implements IHomeCallback {
             mIHomePresenter.unregisterViewCallback(this);
         }
     }
-
-
-
-
+    /**
+     * @Author 孙伟豪
+     * @Date 2020/3/23 0023 18:26
+     * 重新加载
+     */
     @Override
     protected void onRetryClick() {
         //网络错误，点击重试，重新加载分类内容

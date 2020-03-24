@@ -2,22 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="加载中..."
-        app:layout_constraintBottom_toBottomOf="@+id/AVLoadingIndicatorView"
-        app:layout_constraintEnd_toEndOf="@+id/AVLoadingIndicatorView"
-        app:layout_constraintStart_toStartOf="@+id/AVLoadingIndicatorView" />
+    tools:context=".Main2Activity">
 
     <com.wang.avi.AVLoadingIndicatorView
-        android:id="@+id/AVLoadingIndicatorView"
-        style="@style/AVLoadingIndicatorView.Large"
+        android:tooltipText="loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -26,8 +16,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:background="@color/transparent"
-        android:tooltipText="loading"
         app:indicatorColor="@color/colorPrimaryDark"
+        style="@style/AVLoadingIndicatorView.Large"
         app:indicatorName="BallPulseIndicator"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -36,13 +36,10 @@ public class CategoryPagePresenterImpl implements ICategoryPagerPresenter {
 
     }
 
-    private static ICategoryPagerPresenter sInstance = null;
+    private static ICategoryPagerPresenter sInstance = new CategoryPagePresenterImpl();
 
     //饿汉式，跟线程没有关系
     public static ICategoryPagerPresenter getsInstance() {
-        if (sInstance == null) {
-            sInstance = new CategoryPagePresenterImpl();
-        }
         return sInstance;
     }
 
